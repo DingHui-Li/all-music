@@ -22,7 +22,7 @@ class _BodyState extends State<Body> {
   int currentIndex = 0;
   SwiperController _swiperController = SwiperController();
 
-  Color progressColor = Colors.white;
+  Map progressColors = {};
   @override
   void initState() {
     // TODO: implement initState
@@ -34,17 +34,40 @@ class _BodyState extends State<Body> {
     var paletteGenerator = await PaletteGenerator.fromImageProvider(
         NetworkImage(widget.musics[index]['cover']),
         maximumColorCount: 1);
-    this.progressColor = paletteGenerator.paletteColors[0].color;
+    this.progressColors[index] = paletteGenerator.paletteColors[0].color;
     this.setState(() {});
   }
 
-  Widget cover(String cover) {
-    return Padding(
-      //封面
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+  Widget cover() {
+    return Container(
+      constraints:
+          BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 2),
       child: AspectRatio(
         aspectRatio: 1 / 1,
-        child: Image.network(cover, fit: BoxFit.cover),
+        child: Swiper(
+          controller: _swiperController,
+          loop: false,
+          physics: BouncingScrollPhysics(),
+          itemCount: widget.musics.length,
+          itemBuilder: (context, index) => Padding(
+            //封面
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+            child: AspectRatio(
+              aspectRatio: 1 / 1,
+              child: Image.network(widget.musics[index]['cover'],
+                  fit: BoxFit.cover),
+            ),
+          ),
+          onIndexChanged: (value) {
+            widget.changeMusic(value);
+            if (this.progressColors[value] == null) {
+              Future.delayed(
+                  Duration(milliseconds: 500), () => this.getColor(value));
+            }
+            this.currentIndex = value;
+            this.setState(() {});
+          },
+        ),
       ),
     );
   }
@@ -90,7 +113,9 @@ class _BodyState extends State<Body> {
           child: SliderTheme(
               data: SliderThemeData(
                   thumbColor: Colors.white,
-                  activeTrackColor: progressColor,
+                  activeTrackColor: progressColors[currentIndex] != null
+                      ? progressColors[currentIndex]
+                      : Colors.white,
                   trackHeight: 4,
                   inactiveTrackColor: Colors.white.withOpacity(0.15),
                   thumbShape: RoundSliderThumbShape(
@@ -203,33 +228,7 @@ class _BodyState extends State<Body> {
         backgroundColor: Colors.transparent,
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Container(
-              constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height / 2),
-              child: AspectRatio(
-                aspectRatio: 1 / 1,
-                child: Swiper(
-                  controller: _swiperController,
-                  loop: false,
-                  physics: BouncingScrollPhysics(),
-                  itemCount: widget.musics.length,
-                  itemBuilder: (context, index) =>
-                      cover(widget.musics[index]['cover']),
-                  onIndexChanged: (value) {
-                    widget.changeMusic(value);
-                    Future.delayed(Duration(milliseconds: 500),
-                        () => this.getColor(value));
-                    this.currentIndex = value;
-                    this.setState(() {});
-                  },
-                ),
-              ),
-            ),
-            info(),
-            progressBar(),
-            actions()
-          ],
+          children: <Widget>[cover(), info(), progressBar(), actions()],
         ));
   }
 }
