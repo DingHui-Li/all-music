@@ -1,8 +1,14 @@
-import 'package:allMusic/view/play/index.dart';
+import 'package:allMusic/util/hive.dart';
+import 'package:allMusic/view/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+import 'channel/backDesktop.dart';
+
+void main() async {
+  await hiveInit();
   runApp(MyApp());
   SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(statusBarColor: Colors.transparent));
@@ -12,24 +18,27 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          primarySwatch: Colors.blue,
-          // This makes the visual density adapt to the platform that you run
-          // the app on. For desktop platforms, the controls will be smaller and
-          // closer together (more dense) than on mobile platforms.
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: Play());
+    return ValueListenableBuilder(
+      valueListenable: Hive.box('app').listenable(keys: ['dark']),
+      builder: (BuildContext context, box, Widget child) {
+        bool isDark = box.get('dark', defaultValue: false);
+        return MaterialApp(
+            title: 'Flutter Demo',
+            theme: isDark
+                ? ThemeData.dark()
+                : ThemeData(
+                    primarySwatch: Colors.yellow,
+                    visualDensity: VisualDensity.adaptivePlatformDensity,
+                  ),
+            home: WillPopScope(
+              onWillPop: () async {
+                // AndroidBackTop.backDeskTop(); //设置为返回不退出app
+                // return false; //一定要return false
+                return true;
+              },
+              child: Home(),
+            ));
+      },
+    );
   }
 }
