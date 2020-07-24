@@ -27,9 +27,11 @@ class MyApp extends StatelessWidget {
             theme: isDark
                 ? ThemeData.dark()
                 : ThemeData(
-                    primarySwatch: Colors.yellow,
+                    primarySwatch: Colors.blue,
+                    primaryColor: Colors.blueAccent,
                     visualDensity: VisualDensity.adaptivePlatformDensity,
                   ),
+            darkTheme: ThemeData.dark(),
             home: WillPopScope(
               onWillPop: () async {
                 // AndroidBackTop.backDeskTop(); //设置为返回不退出app
