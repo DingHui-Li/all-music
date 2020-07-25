@@ -1,11 +1,12 @@
 import 'package:allMusic/util/hive.dart';
-import 'package:allMusic/view/index.dart';
+import 'package:allMusic/view/page/home/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'channel/backDesktop.dart';
+import 'view/index.dart';
 
 void main() async {
   await hiveInit();
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
                 // return false; //一定要return false
                 return true;
               },
-              child: Home(),
+              child: Index(),
             ));
       },
     );

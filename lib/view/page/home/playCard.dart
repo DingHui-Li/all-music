@@ -57,8 +57,8 @@ class _PlayCardState extends State<PlayCard>
   Widget build(BuildContext context) {
     double _cardHeight = 80;
     double _cardFullWidth = MediaQuery.of(context).size.width - 20;
-    double _top = MediaQuery.of(context).size.height / 3 -
-        MediaQueryData.fromWindow(window).padding.top;
+    double _top = MediaQuery.of(context).size.height / 3 +
+        MediaQueryData.fromWindow(window).padding.top-40;
     double _bottom = MediaQuery.of(context).size.height - 120;
     return AnimatedPositioned(
       duration: Duration(milliseconds: 500),
@@ -87,7 +87,7 @@ class _PlayCardState extends State<PlayCard>
           },
           decoration: BoxDecoration(
             borderRadius:
-                BorderRadius.all(Radius.circular(_scrollTop ? _cardHeight : 5)),
+                BorderRadius.all(Radius.circular(_scrollTop ? _cardHeight : 10)),
             boxShadow: <BoxShadow>[
               // BoxShadow(
               //     color: Colors.black.withOpacity(0.05),
@@ -102,15 +102,16 @@ class _PlayCardState extends State<PlayCard>
             ],
           ),
           child: OpenContainer(
+            closedElevation: 0,
             closedShape: RoundedRectangleBorder(
                 borderRadius:
-                    BorderRadius.circular(_scrollTop ? _cardHeight : 5)),
+                    BorderRadius.circular(_scrollTop ? _cardHeight : 10)),
             closedBuilder: (context, action) => Container(
               clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.all(
-                      Radius.circular(_scrollTop ? _cardHeight : 5))),
+                      Radius.circular(_scrollTop ? _cardHeight : 10))),
               child: PageView.builder(
                   physics: BouncingScrollPhysics(),
                   itemCount: 10,
@@ -128,7 +129,7 @@ class _PlayCardState extends State<PlayCard>
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius:
-              BorderRadius.all(Radius.circular(_scrollTop ? _cardHeight : 5))),
+              BorderRadius.all(Radius.circular(_scrollTop ? _cardHeight : 10))),
       clipBehavior: Clip.hardEdge,
       child: Row(
         children: <Widget>[
