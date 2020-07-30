@@ -8,7 +8,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PlayCard extends StatefulWidget {
   final sc;
-  PlayCard({Key key, this.sc}) : super(key: key);
+  final primaryColor;
+  final textColor;
+  PlayCard({Key key, this.sc,this.primaryColor,this.textColor}) : super(key: key);
 
   @override
   _PlayCardState createState() => _PlayCardState();
@@ -86,14 +88,10 @@ class _PlayCardState extends State<PlayCard>
             }
           },
           decoration: BoxDecoration(
+            color: widget.primaryColor,
             borderRadius:
                 BorderRadius.all(Radius.circular(_scrollTop ? _cardHeight : 10)),
             boxShadow: <BoxShadow>[
-              // BoxShadow(
-              //     color: Colors.black.withOpacity(0.05),
-              //     offset: Offset(1, 2),
-              //     blurRadius: 20,
-              //     spreadRadius: 5)
               BoxShadow(
                   color: Colors.black.withOpacity(_scrollTop ? 0.1 : 0.03),
                   offset: Offset(1, 1),
@@ -102,6 +100,7 @@ class _PlayCardState extends State<PlayCard>
             ],
           ),
           child: OpenContainer(
+            closedColor: widget.primaryColor,
             closedElevation: 0,
             closedShape: RoundedRectangleBorder(
                 borderRadius:
@@ -109,7 +108,7 @@ class _PlayCardState extends State<PlayCard>
             closedBuilder: (context, action) => Container(
               clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: widget.primaryColor,
                   borderRadius: BorderRadius.all(
                       Radius.circular(_scrollTop ? _cardHeight : 10))),
               child: PageView.builder(
@@ -127,7 +126,7 @@ class _PlayCardState extends State<PlayCard>
   Widget cardItem(_cardHeight) {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: widget.primaryColor,
           borderRadius:
               BorderRadius.all(Radius.circular(_scrollTop ? _cardHeight : 10))),
       clipBehavior: Clip.hardEdge,
@@ -185,7 +184,7 @@ class _PlayCardState extends State<PlayCard>
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontSize: 18,
-                            color: Colors.black87,
+                            color:widget.textColor,
                             fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -198,10 +197,11 @@ class _PlayCardState extends State<PlayCard>
                 margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: ClipOval(
                   child: Material(
+                    color: Colors.transparent,
                     child: IconButton(
                       icon: FaIcon(
                         FontAwesomeIcons.play,
-                        color: Colors.black87,
+                        color: widget.textColor,
                       ),
                       onPressed: () {},
                     ),

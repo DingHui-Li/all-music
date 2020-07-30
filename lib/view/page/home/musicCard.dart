@@ -8,27 +8,31 @@ class musicCard extends StatelessWidget {
   final String title;
   final String cover;
   final Color color;
+  final primaryColor;
   const musicCard(
-      {Key key, this.icon, this.title, this.cover, this.color = Colors.white})
+      {Key key,
+      this.icon,
+      this.title,
+      this.cover,
+      this.color = Colors.white,
+      this.primaryColor})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       clipBehavior: Clip.hardEdge,
-      decoration:
-          BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
+      decoration: BoxDecoration(
+          color: this.primaryColor,
+          borderRadius: BorderRadius.all(Radius.circular(10))),
       child: Stack(
         children: <Widget>[
           ConstrainedBox(
             constraints: BoxConstraints.expand(),
             child: cover != ''
                 ? Image.network(cover, fit: BoxFit.cover)
-                : Container(
-                    color: Colors.white,
-                    child: Center(
-                      child: icon,
-                    ),
+                : Center(
+                    child: icon,
                   ),
           ),
           Visibility(
@@ -53,7 +57,7 @@ class musicCard extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: color),
+                        color: this.color),
                   ),
                 )),
           ),

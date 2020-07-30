@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
@@ -23,7 +24,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   // SwiperController _swiperController = SwiperController();
   // PanelController _panelController = PanelController();
   ScrollController _scrollController = ScrollController();
-  List routerStack = ['/'];
+  Color _bgColor = Colors.white; //default value
+  Color _primaryColor = Colors.white;
+  Color _textColor = Colors.black;
+  bool _scrollTop = false;
   @override
   void initState() {
     super.initState();
@@ -34,15 +38,34 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     //     print(data['data']['album']['itemlist']);
     //   }
     // });
+    _scrollController.addListener(() {
+      var temp = false; //避免重复更新-
+      if (_scrollController.offset < 10) {
+        temp = false;
+        if (temp != this._scrollTop) {
+          this.setState(() {
+            this._scrollTop = temp;
+          });
+        }
+      } else {
+        temp = true;
+        if (temp != this._scrollTop) {
+          this.setState(() {
+            this._scrollTop = temp;
+          });
+        }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
-    Color _textColor = isDark ? Colors.white : Colors.black;
-    Color _bgColor = isDark ? Colors.black : Colors.white;
+    _bgColor = getThemeColor(isDark)['_bgColor'];
+    _primaryColor = getThemeColor(isDark)['_primaryColor'];
+    _textColor = getThemeColor(isDark)['_textColor'];
     return Material(
-      color: HexColor('#eeeeee'),
+      color: _bgColor,
       child: Stack(
         children: <Widget>[
           CustomScrollView(
@@ -57,8 +80,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   backgroundColor: Colors.transparent,
                   title: Container(
                     clipBehavior: Clip.hardEdge,
+                    padding: EdgeInsets.symmetric(horizontal: 15),
                     decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: _primaryColor,
                         borderRadius: BorderRadius.all(Radius.circular(30))),
                     child: TextField(
                       decoration: InputDecoration(border: InputBorder.none),
@@ -66,26 +90,45 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ),
                   actions: <Widget>[
                     IconButton(
+                      color: _primaryColor,
                       icon: FaIcon(FontAwesomeIcons.adjust),
-                      onPressed: () {},
+                      onPressed: () {
+                        var box = Hive.box('app');
+                        box.put('dark', !box.get('dark', defaultValue: false));
+                      },
                     )
                   ],
                 ),
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Image.asset(
-                    'assets/bg1.png',
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                    background: Stack(
+                  children: <Widget>[
+                    ConstrainedBox(
+                      constraints: BoxConstraints.expand(),
+                      child: Image.asset(
+                        'assets/bg1.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Visibility(
+                      visible: isDark,
+                      child: Container(
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                    )
+                  ],
+                )),
               ),
               SliverToBoxAdapter(
                 child: SingleChildScrollView(
                     physics: NeverScrollableScrollPhysics(),
                     child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          GridView.count(
-                            padding: EdgeInsets.fromLTRB(10, 60, 10, 0),
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        AnimatedContainer(
+                          duration: Duration(milliseconds: 500),
+                          padding: EdgeInsets.only(top:this._scrollTop?20:60),
+                          child: GridView.count(
+                            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                             physics: NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             crossAxisCount: 3,
@@ -99,22 +142,23 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                     Text(
                                       '20',
                                       style: TextStyle(
-                                          fontSize: 20,
-                                          color: Theme.of(context).primaryColor,
+                                          fontSize: 28,
+                                          color: Colors.blue,
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
                                       '/7',
                                       style: TextStyle(
-                                        fontSize: 12,
-                                        color: Theme.of(context).primaryColor,
+                                        fontSize: 14,
+                                        color: Colors.blue,
                                       ),
                                     ),
                                   ],
                                 ),
                                 title: '今日推荐',
-                                color: Theme.of(context).primaryColor,
+                                color: Colors.blue,
                                 cover: '',
+                                primaryColor: this._primaryColor,
                               ),
                               musicCard(
                                 icon: FaIcon(FontAwesomeIcons.bomb,
@@ -122,6 +166,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 title: '私人FM',
                                 cover:
                                     'http://y.gtimg.cn/music/photo_new/T002R180x180M000002lJJi244utqN_1.jpg',
+                                primaryColor: this._primaryColor,
+                                color: this._textColor,
                               ),
                               musicCard(
                                 icon: FaIcon(FontAwesomeIcons.solidHeart,
@@ -129,15 +175,23 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 title: '我喜欢的音乐',
                                 cover:
                                     'http://y.gtimg.cn/music/photo_new/T002R180x180M000002lJJi244utqN_1.jpg',
+                                primaryColor: this._primaryColor,
+                                color: this._textColor,
                               ),
                             ],
                           ),
-                        ],
+                        ),
+                        Container(height: 500,)
+                      ],
                     )),
               )
             ],
           ),
-          PlayCard(sc: _scrollController)
+          PlayCard(
+            sc: _scrollController,
+            primaryColor: this._primaryColor,
+            textColor: this._textColor,
+          )
         ],
       ),
     );
