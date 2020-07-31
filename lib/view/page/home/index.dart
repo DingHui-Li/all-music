@@ -3,10 +3,6 @@ import 'dart:ui';
 import 'package:allMusic/util/util.dart';
 import 'package:allMusic/view/page/home/musicCard.dart';
 import 'package:allMusic/view/page/home/playCard.dart';
-import 'package:allMusic/view/page/home/songListTab.dart';
-import 'package:allMusic/view/play/index.dart';
-import 'package:allMusic/view/test2.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -62,7 +58,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     _bgColor = getThemeColor(isDark)['_bgColor'];
-    _primaryColor = getThemeColor(isDark)['_primaryColor'];
+    _primaryColor = isDark ? Theme.of(context).primaryColor : Colors.white;
     _textColor = getThemeColor(isDark)['_textColor'];
     return Material(
       color: _bgColor,
@@ -82,7 +78,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     clipBehavior: Clip.hardEdge,
                     padding: EdgeInsets.symmetric(horizontal: 15),
                     decoration: BoxDecoration(
-                        color: _primaryColor,
+                        color: isDark
+                            ? _primaryColor
+                            : Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.all(Radius.circular(30))),
                     child: TextField(
                       decoration: InputDecoration(border: InputBorder.none),
@@ -90,7 +88,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ),
                   actions: <Widget>[
                     IconButton(
-                      color: _primaryColor,
+                      color: isDark
+                          ? _primaryColor
+                          : Theme.of(context).primaryColor,
                       icon: FaIcon(FontAwesomeIcons.adjust),
                       onPressed: () {
                         var box = Hive.box('app');
@@ -126,7 +126,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       children: <Widget>[
                         AnimatedContainer(
                           duration: Duration(milliseconds: 500),
-                          padding: EdgeInsets.only(top:this._scrollTop?20:60),
+                          padding: EdgeInsets.only(
+                              top: this._scrollTop ||
+                                      Hive.box('play').get('list',
+                                              defaultValue: []).length ==
+                                          0
+                                  ? 10
+                                  : 60),
                           child: GridView.count(
                             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                             physics: NeverScrollableScrollPhysics(),
@@ -167,7 +173,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 cover:
                                     'http://y.gtimg.cn/music/photo_new/T002R180x180M000002lJJi244utqN_1.jpg',
                                 primaryColor: this._primaryColor,
-                                color: this._textColor,
+                                //color: this._textColor,
                               ),
                               musicCard(
                                 icon: FaIcon(FontAwesomeIcons.solidHeart,
@@ -176,22 +182,27 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 cover:
                                     'http://y.gtimg.cn/music/photo_new/T002R180x180M000002lJJi244utqN_1.jpg',
                                 primaryColor: this._primaryColor,
-                                color: this._textColor,
+                                //color: this._textColor,
                               ),
                             ],
                           ),
                         ),
-                        Container(height: 500,)
+                        Container(
+                          height: 500,
+                        )
                       ],
                     )),
               )
             ],
           ),
-          PlayCard(
-            sc: _scrollController,
-            primaryColor: this._primaryColor,
-            textColor: this._textColor,
-          )
+          Visibility(
+            visible: Hive.box('play').get('list', defaultValue: []).length > 0,
+            child: PlayCard(
+              sc: _scrollController,
+              primaryColor: this._primaryColor,
+              textColor: this._textColor,
+            ),
+          ),
         ],
       ),
     );

@@ -36,6 +36,9 @@ dependencies:
   hive: ^1.4.1+1
   hive_flutter: ^0.3.0+2
   animations: ^1.1.1
+  flutter_spinkit: ^4.1.2+1
+  bottom_navy_bar: ^5.5.0
+  audioplayer: ^0.8.1
 
 dev_dependencies:
   flutter_test:

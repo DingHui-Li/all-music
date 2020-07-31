@@ -1,24 +1,23 @@
 import 'dart:async';
-import 'dart:ffi';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive/hive.dart';
-import 'package:palette_generator/palette_generator.dart';
 
 class Play extends StatefulWidget {
-  final musics;
   final index;
   final isDark;
-  Play({Key key, this.musics, this.index, this.isDark}) : super(key: key);
+  Play({Key key, this.index = 0, this.isDark = false}) : super(key: key);
 
   @override
   _PlayState createState() => _PlayState();
 }
 
 class _PlayState extends State<Play> {
+  List musics = Hive.box('play').get('list', defaultValue: []);
+
   double current = 0; //当前播放位置 s
   bool play = false; //播放
   Timer timer; //定时器-模拟播放
@@ -35,11 +34,9 @@ class _PlayState extends State<Play> {
         child: PageView.builder(
           controller: _pageController,
           physics: BouncingScrollPhysics(),
-          itemCount: widget.musics.length,
+          itemCount: musics.length,
           itemBuilder: (context, index) {
-            int albumid = widget.musics[index]['data']['albumid'];
-            String _cover =
-                'http://imgcache.qq.com/music/photo/album_300/${albumid % 100}/300_albumpic_${albumid}_0.jpg';
+            var music = musics[index];
             return Padding(
                 //封面
                 padding: EdgeInsets.fromLTRB(40, 20, 40, 20),
@@ -47,50 +44,85 @@ class _PlayState extends State<Play> {
                     aspectRatio: 1 / 1,
                     child: Container(
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                                color: _textColor.withOpacity(0.1),
-                                offset: Offset(0, 1),
-                                blurRadius: 10,
-                                spreadRadius: 7)
-                          ]),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                        ),
-                        clipBehavior: Clip.hardEdge,
-                        child: Image.network(_cover, fit: BoxFit.cover),
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                        // boxShadow: <BoxShadow>[
+                        //   BoxShadow(
+                        //       color: _textColor.withOpacity(0.1),
+                        //       offset: Offset(0, 1),
+                        //       blurRadius: 10,
+                        //       spreadRadius: 7)
+                        // ]
                       ),
+                      child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(15)),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: music['album']['img'] != ''
+                              ? Stack(
+                                  children: <Widget>[
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints.expand(),
+                                      child: Image.network(
+                                        music['album']['img'],
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Visibility(
+                                        visible: widget.isDark,
+                                        child: Container(
+                                          color: Colors.black.withOpacity(0.4),
+                                        ))
+                                  ],
+                                )
+                              : Center(
+                                  child: FaIcon(
+                                  FontAwesomeIcons.music,
+                                  size: 60,
+                                  color: Colors.white.withOpacity(0.5),
+                                ))),
                     )));
           },
           onPageChanged: (index) {
-            _temp.add(index);
-            Future.delayed(Duration(milliseconds: 500), () {
-              if (_temp.length > 0)
-                Hive.box('play').put('index', _temp[_temp.length - 1]);
-              _temp = [];
-            });
+            // _temp.add(index);
+            // Future.delayed(Duration(milliseconds: 500), () {
+            //   if (_temp.length > 0)
+            //     Hive.box('play').put('index', _temp[_temp.length - 1]);
+            //   _temp = [];
+            // });
           },
         ),
       ),
     );
   }
 
+  _singer(source, singer) {
+    if (source == 'kg') {
+      return singer;
+    } else {
+      if (singer is List) {
+        String s = singer.fold('', (curr, next) => curr + '/' + next['name']);
+        return s.replaceFirst('/', '');
+      }
+    }
+    return 'unknow';
+  }
+
   Widget info() {
-    String _name = widget.musics[widget.index]['data']['songname'];
-    String _singer = widget.musics[widget.index]['data']['singer'][0]['name'];
+    var music = musics[widget.index];
+    // String _name = musics[widget.index]['data']['songname'];
+    // String _singer = musics[widget.index]['data']['singer'][0]['name'];
     Color _textColor = widget.isDark ? Colors.white : Colors.black;
     return Padding(
         //歌名等信息
         padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
         child: ListTile(
             title: Text(
-              _name,
+              music['name'],
               style: TextStyle(fontWeight: FontWeight.bold, color: _textColor),
             ),
             subtitle: Text(
-              _singer,
+              _singer(music['source'], music['singer']),
               style: TextStyle(color: _textColor),
             ),
             trailing: ClipOval(
@@ -108,8 +140,8 @@ class _PlayState extends State<Play> {
   }
 
   Widget progressBar() {
-    double _duration = double.parse(
-        widget.musics[widget.index]['data']['interval'].toString());
+    double _duration =
+        double.parse(musics[widget.index]['duration'].toString());
     Color _textColor = widget.isDark ? Colors.white : Colors.black;
     //进度条
     var textStyle = TextStyle(fontSize: 10, color: _textColor.withOpacity(0.7));
@@ -158,9 +190,9 @@ class _PlayState extends State<Play> {
   }
 
   Widget actions() {
-    int _duration = widget.musics[widget.index]['data']['interval'];
+    int _duration = musics[widget.index]['duration'];
     Color _textColor = widget.isDark ? Colors.white : Colors.black;
-    int total = widget.musics.length;
+    int total = musics.length;
     //播放操作
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -220,17 +252,8 @@ class _PlayState extends State<Play> {
     }
     return Scaffold(
         // appBar: AppBar(
-        //   leading: IconButton(
-        //     icon: FaIcon(
-        //       FontAwesomeIcons.chevronDown,
-        //       size: 15,
-        //     ),
-        //     onPressed: () {
-        //       widget.close();
-        //     },
-        //   ),
         //   title: Text(
-        //     widget.musics[currentIndex]['name'],
+        //     musics[widget.index]['name'],
         //     style: TextStyle(fontSize: 14),
         //   ),
         //   centerTitle: true,
@@ -246,22 +269,52 @@ class _PlayState extends State<Play> {
         //   backgroundColor: Colors.transparent,
         //   elevation: 0,
         // ),
-        backgroundColor: Colors.transparent,
-        body: Column(
+        body: Stack(
+      children: <Widget>[
+        ConstrainedBox(
+          constraints: BoxConstraints.expand(),
+          child: Image.network(musics[widget.index]['album']['img'],
+              fit: BoxFit.cover),
+        ),
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+          child: Container(
+              color: widget.isDark
+                  ? Colors.black.withOpacity(0.8)
+                  : Colors.white.withOpacity(0.2)),
+        ),
+        Column(
+          mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Container(
-              width: 50,
-              height: 5,
-              decoration: BoxDecoration(
-                  color: _textColor.withOpacity(0.3),
-                  borderRadius: BorderRadius.all(Radius.circular(30))),
+            SizedBox(height: 1),
+            ListTile(
+              leading: IconButton(
+                icon: FaIcon(
+                  FontAwesomeIcons.arrowLeft,
+                  size: 18,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              title: Text(musics[widget.index]['name'],
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+              trailing: IconButton(
+                icon: FaIcon(
+                  FontAwesomeIcons.ellipsisH,
+                  size: 15,
+                ),
+                onPressed: () {},
+              ),
             ),
             cover(),
             info(),
             progressBar(),
             actions()
           ],
-        ));
+        )
+      ],
+    ));
   }
 }

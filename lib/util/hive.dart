@@ -10,6 +10,7 @@ Future hiveInit() {
     //box.put('list', []); //播放列表
     //box.put('index', 0); //当前播放的下标
     box.put('action', '');
+    //box.put('search_history', []);//[]
 
     box2.put('dark', false);
     box2.put('route', {'action': 'push', 'route': '/'});

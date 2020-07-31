@@ -29,6 +29,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.4.1"
+  audioplayer:
+    dependency: "direct main"
+    description:
+      name: audioplayer
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.8.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -36,6 +43,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.0"
+  bottom_navy_bar:
+    dependency: "direct main"
+    description:
+      name: bottom_navy_bar
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "5.5.0"
   charcode:
     dependency: transitive
     description:
@@ -97,6 +111,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.0.3"
+  flutter_spinkit:
+    dependency: "direct main"
+    description:
+      name: flutter_spinkit
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "4.1.2+1"
   flutter_swiper:
     dependency: "direct main"
     description:

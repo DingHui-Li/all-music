@@ -1,4 +1,5 @@
 import 'package:allMusic/util/hive.dart';
+import 'package:allMusic/util/util.dart';
 import 'package:allMusic/view/page/home/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
                 ? ThemeData.dark()
                 : ThemeData(
                     primarySwatch: Colors.blue,
-                    primaryColor: Colors.blueAccent,
+                    primaryColor: HexColor('#8BC34A'),
                     visualDensity: VisualDensity.adaptivePlatformDensity,
                   ),
             darkTheme: ThemeData.dark(),

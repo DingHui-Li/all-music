@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:allMusic/view/play/index.dart';
+import 'package:allMusic/view/page/play/index.dart';
 import 'package:allMusic/view/test2.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,8 @@ class PlayCard extends StatefulWidget {
   final sc;
   final primaryColor;
   final textColor;
-  PlayCard({Key key, this.sc,this.primaryColor,this.textColor}) : super(key: key);
+  PlayCard({Key key, this.sc, this.primaryColor, this.textColor})
+      : super(key: key);
 
   @override
   _PlayCardState createState() => _PlayCardState();
@@ -57,11 +58,13 @@ class _PlayCardState extends State<PlayCard>
 
   @override
   Widget build(BuildContext context) {
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
     double _cardHeight = 80;
     double _cardFullWidth = MediaQuery.of(context).size.width - 20;
     double _top = MediaQuery.of(context).size.height / 3 +
-        MediaQueryData.fromWindow(window).padding.top-40;
-    double _bottom = MediaQuery.of(context).size.height - 120;
+        MediaQueryData.fromWindow(window).padding.top -
+        40;
+    double _bottom = MediaQuery.of(context).size.height - 150;
     return AnimatedPositioned(
       duration: Duration(milliseconds: 500),
       curve: Curves.fastOutSlowIn,
@@ -89,8 +92,8 @@ class _PlayCardState extends State<PlayCard>
           },
           decoration: BoxDecoration(
             color: widget.primaryColor,
-            borderRadius:
-                BorderRadius.all(Radius.circular(_scrollTop ? _cardHeight : 10)),
+            borderRadius: BorderRadius.all(
+                Radius.circular(_scrollTop ? _cardHeight : 10)),
             boxShadow: <BoxShadow>[
               BoxShadow(
                   color: Colors.black.withOpacity(_scrollTop ? 0.1 : 0.03),
@@ -100,8 +103,9 @@ class _PlayCardState extends State<PlayCard>
             ],
           ),
           child: OpenContainer(
-            closedColor: widget.primaryColor,
-            closedElevation: 0,
+            closedColor: isDark ? widget.primaryColor : Colors.white,
+            openColor: isDark ? widget.primaryColor : Colors.white,
+            closedElevation: _scrollTop ? 5 : 0,
             closedShape: RoundedRectangleBorder(
                 borderRadius:
                     BorderRadius.circular(_scrollTop ? _cardHeight : 10)),
@@ -115,15 +119,16 @@ class _PlayCardState extends State<PlayCard>
                   physics: BouncingScrollPhysics(),
                   itemCount: 10,
                   itemBuilder: (context, index) {
-                    return cardItem(_cardHeight);
+                    return cardItem(_cardHeight, isDark);
                   }),
             ),
-            openBuilder: (context, action) => Test(),
+            openBuilder: (context, action) =>
+                Play(isDark: Theme.of(context).brightness == Brightness.dark),
           )),
     );
   }
 
-  Widget cardItem(_cardHeight) {
+  Widget cardItem(_cardHeight, isDark) {
     return Container(
       decoration: BoxDecoration(
           color: widget.primaryColor,
@@ -145,6 +150,12 @@ class _PlayCardState extends State<PlayCard>
                           'http://y.gtimg.cn/music/photo_new/T002R180x180M000004VfM814VFuNw_1.jpg',
                           fit: BoxFit.cover),
                     ),
+                    Visibility(
+                      visible: isDark,
+                      child: Container(
+                        color: Colors.black.withOpacity(0.4),
+                      ),
+                    )
                     // Visibility(
                     //     visible: _scrollTop,
                     //     child: Container(
@@ -184,7 +195,7 @@ class _PlayCardState extends State<PlayCard>
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontSize: 18,
-                            color:widget.textColor,
+                            color: widget.textColor,
                             fontWeight: FontWeight.bold),
                       ),
                     ],
